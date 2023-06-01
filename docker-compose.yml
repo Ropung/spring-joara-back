@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+#  https://recordsoflife.tistory.com/520#recentComments
+
+  joara_postgres14_proto:
+    image: postgres:14
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    container_name: joara_postgres14_rdb_proto
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_DB: "${POSTGRES_DB_NAME}" #
+      POSTGRES_USER: "${POSTGRES_DB_USERNAME}" #
+      POSTGRES_PASSWORD: "${POSTGRES_DB_PASSWORD}" #
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --lc-collate=C --lc-ctype=C'
+    ports:
+      - 5432:5432
+    volumes:
+      - sticky_volume:/var/lib/postgresql/data
+      - ./db/initdb.d:/docker-entrypoint-initdb.d:ro
+    env_file:
+      - .env
+
+  joara_redis_proto:
+    image: redis:7.0
+    container_name: joara_redis7_proto
+    ports:
+      - 6379:6379
+    volumes:
+      - sticky_volume:/redis/data
+      - ./config/redis.conf:/usr/local/conf/redis.conf
+    # 컨테이너에 docker label을 이용해서 메타데이터 추가
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    # 컨테이너 종료시 재시작 여부 설정
+    restart: always
+    command: redis-server /usr/local/conf/redis.conf
+
+volumes:
+  sticky_volume:

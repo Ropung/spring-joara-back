@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: DEBUG
+    com.joara: DEBUG
+    com.zaxxer.hikari: TRACE
